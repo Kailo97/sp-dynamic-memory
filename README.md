@@ -1,5 +1,5 @@
 # Dynamic memory for SourcePawn
-This include file provide functions to create and use statically allocated memory heap inside your plugin.
+This include file provide functions to create and use statically allocated memory heap inside your plugin.  
 Heap is based on global one-dimensional array.
 ## Download
 From [source code above](https://github.com/Kailo97/sp-dynamic-memory/blob/master/memory.inc) or [Releases page](https://github.com/Kailo97/sp-dynamic-memory/releases).
@@ -32,8 +32,8 @@ void memmove(int fromadr, int toadr, int size);
 void memmover(int fromadr, int toadr, int size);
 ```
 ## Links
-[AlliedModders Forum Page][1]
-[HLmod Forum Page][2]
+[AlliedModders Forum Page][1]  
+[HLmod Forum Page][2]  
 Support me: [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)][3] or [![Donate](https://img.shields.io/badge/Donate-Qiwi-green.svg)][4]
 
 [1]: / 
