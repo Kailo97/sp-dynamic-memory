@@ -36,7 +36,7 @@ void memmover(int fromadr, int toadr, int size);
 [HLmod Forum Page][2]  
 Support me: [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)][3] or [![Donate](https://img.shields.io/badge/Donate-Qiwi-green.svg)][4]
 
-[1]: / 
+[1]: https://forums.alliedmods.net/showthread.php?t=318387
 [2]: / 
 [3]: https://www.paypal.me/KailoTM
 [4]: https://qiwi.me/kailo
