@@ -1,6 +1,7 @@
 /**
  * =============================================================================
  * Dynamic memory
+ * https://github.com/Kailo97/sp-dynamic-memory
  * 
  * Copyright (C) 2019 Maxim "Kailo" Telezhenko. All rights reserved.
  * =============================================================================
@@ -558,6 +559,7 @@ stock int memalloc(int size)
 
 	heap_space[block + Block_Status] = BlockStatus_Busy;
 	BST_Remove(heap_space[block + Block_RefMagic]);
+
 	heap_space[block + Block_RefMagic] = BUSY_MEM_MAGIC;
 
 	// if splitted
