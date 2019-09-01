@@ -28,7 +28,7 @@
  * or <http://www.sourcemod.net/license.php>.
  */
 
-#define DYNAMIC_MEMORY_VERSION "1.0.0"
+#define DYNAMIC_MEMORY_VERSION "1.1.0"
 
 #define OUT_OF_BOUNDS_SPACE -1
 
@@ -930,6 +930,57 @@ stock void memmover(int fromadr, int toadr, int size)
 
 	for (int i = size - 1; i >= 0; i--)
 		heap_space[toadr + i] = heap_space[fromadr + i];
+}
+
+stock static void bytemove(const char[] from, char[] to, int maxlength)
+{
+	int i = 0, c;
+	while ((c = from[i]) != 0 && --maxlength)
+	{
+		to[i] = c;
+		i++;
+	}
+	to[i] = '\0';
+}
+
+stock void mempastestr(int adr, const char[] str, int size)
+{
+#if defined DEBUG_HEAP_MEMORY_INIT
+	if (!inited)
+		ThrowError(sErrorNotInit);
+#endif
+
+#if defined DEBUG_HEAP_MEMORY_SIZE
+	if (size <= 0)
+		ThrowError(sErrorInvSize, size);
+#endif
+
+#if defined DEBUG_HEAP_MEMORY_BOUNDS
+	if (adr < Block_SIZE * 2 || adr + (size + 3) / 4 >= BSTBlock_adr)
+		ThrowError(sErrorAddress, adr);
+#endif
+
+	bytemove(str, view_as<char>(heap_space[adr]), size);
+}
+
+stock void memcopystr(int adr, char[] str, int size)
+{
+#if defined DEBUG_HEAP_MEMORY_INIT
+	if (!inited)
+		ThrowError(sErrorNotInit);
+#endif
+
+#if defined DEBUG_HEAP_MEMORY_SIZE
+	if (size <= 0)
+		ThrowError(sErrorInvSize, size);
+#endif
+
+#if defined DEBUG_HEAP_MEMORY_BOUNDS
+	if (adr < Block_SIZE * 2 || adr + (size + 3) / 4 >= BSTBlock_adr)
+		ThrowError(sErrorAddress, adr);
+#endif
+
+	bytemove(view_as<char>(heap_space[adr]), str, size);
 }
 
 stock void DumpMemory()
