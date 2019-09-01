@@ -30,6 +30,8 @@ void mempaste(int adr, const any[] array, int size);
 void memcopy(int adr, any[] array, int size);
 void memmove(int fromadr, int toadr, int size);
 void memmover(int fromadr, int toadr, int size);
+void mempastestr(int adr, const char[] str, int size);
+void memcopystr(int adr, char[] str, int size);
 ```
 ## Links
 [AlliedModders Forum Page][1]  
