@@ -28,7 +28,7 @@
  * or <http://www.sourcemod.net/license.php>.
  */
 
-#define DYNAMIC_MEMORY_VERSION "1.1.0"
+#define DYNAMIC_MEMORY_VERSION "1.2.0"
 
 #define OUT_OF_BOUNDS_SPACE -1
 
@@ -84,6 +84,7 @@ stock static any heap_space[HEAP_SIZE];
 //     int left;
 //     int right;
 //     int parent;
+//     int color;
 // }
 
 // Free Block Struct
@@ -107,10 +108,17 @@ stock static any heap_space[HEAP_SIZE];
 
 enum
 {
+	NodeColor_Black,
+	NodeColor_Red
+};
+
+enum
+{
 	BSTNode_Value,
 	BSTNode_Left,
 	BSTNode_Right,
 	BSTNode_Parent,
+	BSTNode_Color,
 
 	BSTNode_SIZE,
 };
@@ -196,6 +204,62 @@ stock static int BST_Next(int node)
 		n = heap_space[n + BSTNode_Parent];
 	}
 	return n;
+}
+
+stock static void BST_RotateR(int x)
+{
+	int y = heap_space[x + BSTNode_Left];
+	int n = heap_space[x + BSTNode_Left] = heap_space[y + BSTNode_Right];
+	if (n != BST_NULL)
+	{
+		heap_space[n + BSTNode_Parent] = x;
+	}
+	n = heap_space[y + BSTNode_Parent] = heap_space[x + BSTNode_Parent];
+	if (n != BST_NULL)
+	{
+		if (heap_space[n + BSTNode_Left] == x)
+		{
+			heap_space[n + BSTNode_Left] = y;
+		}
+		else
+		{
+			heap_space[n + BSTNode_Right] = y;
+		}
+	}
+	else
+	{
+		heap_space[BSTBlockTail + BSTBlockTail_Root] = y;
+	}
+	heap_space[y + BSTNode_Right] = x;
+	heap_space[x + BSTNode_Parent] = y;
+}
+
+stock static void BST_RotateL(int x)
+{
+	int y = heap_space[x + BSTNode_Right];
+	int n = heap_space[x + BSTNode_Right] = heap_space[y + BSTNode_Left];
+	if (n != BST_NULL)
+	{
+		heap_space[n + BSTNode_Parent] = x;
+	}
+	n = heap_space[y + BSTNode_Parent] = heap_space[x + BSTNode_Parent];
+	if (n != BST_NULL)
+	{
+		if (heap_space[n + BSTNode_Right] == x)
+		{
+			heap_space[n + BSTNode_Right] = y;
+		}
+		else
+		{
+			heap_space[n + BSTNode_Left] = y;
+		}
+	}
+	else
+	{
+		heap_space[BSTBlockTail + BSTBlockTail_Root] = y;
+	}
+	heap_space[y + BSTNode_Left] = x;
+	heap_space[x + BSTNode_Parent] = y;
 }
 
 stock static void BST_Remove(int node, bool recursion = false)
@@ -291,6 +355,97 @@ stock static void BST_Remove(int node, bool recursion = false)
 				}
 			}
 			node = successor;
+		}
+	}
+
+	// RB-Tree balance
+	{
+		int root = heap_space[BSTBlockTail + BSTBlockTail_Root];
+		if (root != BST_NULL && heap_space[node + BSTNode_Color] == NodeColor_Black)
+		{
+			int n = heap_space[node + BSTNode_Left], f, b, cl, cr;
+			if (n == BST_NULL)
+			{
+				n = heap_space[node + BSTNode_Right];
+			}
+			while (n != root && (n == BST_NULL || heap_space[n + BSTNode_Color] == NodeColor_Black))
+			{
+				f = heap_space[(n == BST_NULL ? node : n) + BSTNode_Parent];
+				if (heap_space[f + BSTNode_Left] == n)
+				{
+					b = heap_space[f + BSTNode_Right];
+					if (heap_space[b + BSTNode_Color] != NodeColor_Black)
+					{
+						heap_space[b + BSTNode_Color] = NodeColor_Black;
+						heap_space[f + BSTNode_Color] = NodeColor_Red;
+						BST_RotateL(f);
+						b = heap_space[f + BSTNode_Right];
+					}
+					cl = heap_space[b + BSTNode_Left];
+					cr = heap_space[b + BSTNode_Right];
+					if ((cl == BST_NULL || heap_space[cl + BSTNode_Color] == NodeColor_Black)
+						&& (cr == BST_NULL || heap_space[cr + BSTNode_Color] == NodeColor_Black))
+					{
+						heap_space[b + BSTNode_Color] = NodeColor_Red;
+						n = f;
+					}
+					else
+					{
+						if ((cr == BST_NULL || heap_space[cr + BSTNode_Color] == NodeColor_Black))
+						{
+							heap_space[cl + BSTNode_Color] = NodeColor_Black;
+							heap_space[b + BSTNode_Color] = NodeColor_Red;
+							BST_RotateR(b);
+							cr = b;
+							b = cl;
+						}
+						heap_space[b + BSTNode_Color] = heap_space[f + BSTNode_Color];
+						heap_space[f + BSTNode_Color] = NodeColor_Black;
+						heap_space[cr + BSTNode_Color] = NodeColor_Black;
+						BST_RotateL(f);
+						n = root;
+					}
+				}
+				else
+				{
+					b = heap_space[f + BSTNode_Left];
+					if (heap_space[b + BSTNode_Color] != NodeColor_Black)
+					{
+						heap_space[b + BSTNode_Color] = NodeColor_Black;
+						heap_space[f + BSTNode_Color] = NodeColor_Red;
+						BST_RotateR(f);
+						b = heap_space[f + BSTNode_Left];
+					}
+					cr = heap_space[b + BSTNode_Right];
+					cl = heap_space[b + BSTNode_Left];
+					if ((cr == BST_NULL || heap_space[cr + BSTNode_Color] == NodeColor_Black)
+						&& (cl == BST_NULL || heap_space[cl + BSTNode_Color] == NodeColor_Black))
+					{
+						heap_space[b + BSTNode_Color] = NodeColor_Red;
+						n = f;
+					}
+					else
+					{
+						if ((cl == BST_NULL || heap_space[cl + BSTNode_Color] == NodeColor_Black))
+						{
+							heap_space[cr + BSTNode_Color] = NodeColor_Black;
+							heap_space[b + BSTNode_Color] = NodeColor_Red;
+							BST_RotateL(b);
+							cl = b;
+							b = cr;
+						}
+						heap_space[b + BSTNode_Color] = heap_space[f + BSTNode_Color];
+						heap_space[f + BSTNode_Color] = NodeColor_Black;
+						heap_space[cl + BSTNode_Color] = NodeColor_Black;
+						BST_RotateR(f);
+						n = root;
+					}
+				}
+			}
+			if (n != BST_NULL)
+			{
+				heap_space[n + BSTNode_Color] = NodeColor_Black;
+			}
 		}
 	}
 
@@ -396,6 +551,7 @@ stock static int BST_Insert(int value)
 		heap_space[node + BSTNode_Left] = BST_NULL;
 		heap_space[node + BSTNode_Right] = BST_NULL;
 		heap_space[node + BSTNode_Parent] = BST_NULL;
+		heap_space[node + BSTNode_Color] = NodeColor_Black;
 		heap_space[BSTBlockTail + BSTBlockTail_Root] = node;
 		heap_space[BSTBlockTail + BSTBlockTail_Size] = 1;
 		return node;
@@ -464,6 +620,63 @@ stock static int BST_Insert(int value)
 			}
 		}
 	}
+
+	// RB-Tree balance
+	heap_space[(x = node) + BSTNode_Color] = NodeColor_Red;
+	int f, g, u;
+	while (x != heap_space[BSTBlockTail + BSTBlockTail_Root]
+			&& heap_space[(f = heap_space[x + BSTNode_Parent]) + BSTNode_Color] != NodeColor_Black)
+	{
+		if (f == heap_space[(g = heap_space[f + BSTNode_Parent]) + BSTNode_Left])
+		{
+			u = heap_space[g + BSTNode_Right];
+			if (heap_space[u + BSTNode_Color] != NodeColor_Black)
+			{
+				heap_space[f + BSTNode_Color] = NodeColor_Black;
+				heap_space[u + BSTNode_Color] = NodeColor_Black;
+				heap_space[g + BSTNode_Color] = NodeColor_Red;
+				x = g;
+			}
+			else
+			{
+				if (x == heap_space[f + BSTNode_Right])
+				{
+					c = x;
+					x = f;
+					f = c;
+					BST_RotateL(x);
+				}
+				heap_space[f + BSTNode_Color] = NodeColor_Black;
+				heap_space[g + BSTNode_Color] = NodeColor_Red;
+				BST_RotateR(g);
+			}
+		}
+		else
+		{
+			u = heap_space[g + BSTNode_Left];
+			if (heap_space[u + BSTNode_Color] != NodeColor_Black)
+			{
+				heap_space[f + BSTNode_Color] = NodeColor_Black;
+				heap_space[u + BSTNode_Color] = NodeColor_Black;
+				heap_space[g + BSTNode_Color] = NodeColor_Red;
+				x = g;
+			}
+			else
+			{
+				if (x == heap_space[f + BSTNode_Left])
+				{
+					c = x;
+					x = f;
+					f = c;
+					BST_RotateR(x);
+				}
+				heap_space[f + BSTNode_Color] = NodeColor_Black;
+				heap_space[g + BSTNode_Color] = NodeColor_Red;
+				BST_RotateL(g);
+			}
+		}
+	}
+	heap_space[heap_space[BSTBlockTail + BSTBlockTail_Root] + BSTNode_Color] = NodeColor_Black;
 
 	return node;
 }
