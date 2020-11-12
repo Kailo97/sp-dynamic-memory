@@ -41,4 +41,4 @@ Support me: [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)][3]
 [1]: https://forums.alliedmods.net/showthread.php?t=318387
 [2]: https://hlmod.ru/resources/inc-dynamic-memory-heap.1301/
 [3]: https://www.paypal.me/KailoTM
-[4]: https://qiwi.me/kailo
+[4]: https://my.qiwi.com/ELENA-TcboBDw2qV
