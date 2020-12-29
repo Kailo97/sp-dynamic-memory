@@ -28,7 +28,7 @@
  * or <http://www.sourcemod.net/license.php>.
  */
 
-#define DYNAMIC_MEMORY_VERSION "1.2.0"
+#define DYNAMIC_MEMORY_VERSION "1.2.1"
 
 #define OUT_OF_BOUNDS_SPACE -1
 
@@ -457,6 +457,7 @@ stock static void BST_Remove(int node, bool recursion = false)
 			left = heap_space[node + BSTNode_Left] = heap_space[last + BSTNode_Left],
 			right = heap_space[node + BSTNode_Right] = heap_space[last + BSTNode_Right],
 			parent = heap_space[node + BSTNode_Parent] = heap_space[last + BSTNode_Parent];
+		heap_space[node + BSTNode_Color] = heap_space[last + BSTNode_Color];
 		if (parent == BST_NULL)
 		{
 			heap_space[BSTBlockTail + BSTBlockTail_Root] = node;
@@ -575,6 +576,7 @@ stock static int BST_Insert(int value)
 		heap_space[new_head + BSTBlockHead_Next] = OUT_OF_BOUNDS_SPACE;
 		heap_space[new_head + BSTBlockHead_Status] = BlockStatus_Busy;
 		heap_space[BSTBlockTail + BSTBlockTail_Alloc] += BST_ALLOC_COUNT;
+		// TODO: Check if remain memory space is 0 size
 		heap_space[prev + Block_Size] -= BST_ALLOC_SIZE;
 		heap_space[prev + Block_RefMagic] = BST_Insert(prev);
 		heap_space[prev + Block_Next] = BSTBlock_adr = new_head;
